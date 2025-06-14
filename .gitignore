@@ -1,0 +1,7 @@
+.vercel
+node_modules/
+.env
+.next
+.vercelnode_modules/
+.next/
+.vercel/

@@ -1,0 +1,16 @@
+{
+  "/api/cancel-subscription/route": "/api/cancel-subscription",
+  "/api/ai/chat/route": "/api/ai/chat",
+  "/api/credits/route": "/api/credits",
+  "/api/email/welcome/route": "/api/email/welcome",
+  "/api/create-checkout-session/route": "/api/create-checkout-session",
+  "/_not-found/page": "/_not-found",
+  "/api/webhooks/stripe/route": "/api/webhooks/stripe",
+  "/api/odds-api/route": "/api/odds-api",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login",
+  "/page": "/",
+  "/company/page": "/company",
+  "/pricing/page": "/pricing",
+  "/dashboard/page": "/dashboard"
+}
