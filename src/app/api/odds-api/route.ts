@@ -28,9 +28,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const sport = searchParams.get('sport')?.toLowerCase() || 'nba';
     const markets = searchParams.get('markets')?.toLowerCase() || 'h2h';
-    const includeLinks = searchParams.get('includeLinks') !== 'false'; // default true
 
-    console.log('Request params:', { sport, markets, includeLinks });
+    console.log('Request params:', { sport, markets });
 
     const mappedSport = SPORT_MAPPING[sport];
     if (!mappedSport) {
@@ -47,7 +46,8 @@ export async function GET(request: Request) {
     }
 
     // Always request American odds format and both US and EU regions
-    const apiUrl = `https://api.the-odds-api.com/v4/sports/${mappedSport}/odds/?apiKey=${apiKey}&regions=us,eu&markets=${markets}&oddsFormat=american`;
+    const apiUrl = `https://api.the-odds-api.com/v4/sports/${mappedSport}/odds/?apiKey=${apiKey}&regions=us,eu&markets=${markets}&oddsFormat=american&includeLinks=true`;
+    
     console.log('Fetching from:', apiUrl);
 
     const res = await fetch(apiUrl);
@@ -89,17 +89,6 @@ export async function GET(request: Request) {
     // Debug: log the first event's first bookmaker object
     if (Array.isArray(data) && data.length > 0 && data[0].bookmakers && data[0].bookmakers.length > 0) {
       console.log('First bookmaker object:', data[0].bookmakers[0]);
-    }
-
-    // If includeLinks is false, remove bookmaker.url from each bookmaker
-    if (!includeLinks && Array.isArray(data)) {
-      data = data.map((event: any) => ({
-        ...event,
-        bookmakers: event.bookmakers?.map((bm: any) => {
-          const { url, ...rest } = bm;
-          return rest;
-        }) || []
-      }));
     }
 
     console.log('API Response:', {

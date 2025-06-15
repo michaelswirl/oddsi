@@ -31,25 +31,34 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { cn } from "@/lib/utils"
+
+type Outcome = {
+  name: string;
+  price: number;
+  point?: number;
+  link?: string;
+};
+
+type Market = {
+  key: string;
+  outcomes: Outcome[];
+  link?: string;
+};
+
+type Bookmaker = {
+  key: string;
+  title: string;
+  markets: Market[];
+  link?: string;
+};
 
 type OddsData = {
   id: string
   sport_title: string
   home_team: string
   away_team: string
-  bookmakers: {
-    key: string
-    title: string
-    markets: {
-      key: string
-      outcomes: {
-        name: string
-        price: number
-        point?: number
-      }[]
-    }[]
-    url?: string
-  }[]
+  bookmakers: Bookmaker[];
   commence_time: string
 }
 
@@ -175,17 +184,13 @@ function getHighlightClass(val: string, pinVal: string, type: 'price' | 'point',
   if (type === 'price') {
     // For price: better for user is higher for positive odds, less negative for negative odds
     if (pinNum > 0 && num > pinNum) return 'bg-primary/20'; // better positive
-    if (pinNum > 0 && num < pinNum) return 'bg-destructive/20'; // worse positive
     if (pinNum < 0 && num > pinNum) return 'bg-primary/20'; // less negative is better
-    if (pinNum < 0 && num < pinNum) return 'bg-destructive/20'; // more negative is worse
   } else if (type === 'point') {
     // For point: depends on side
     if (side === 'home' || side === 'over') {
       if (num > pinNum) return 'bg-primary/20';
-      if (num < pinNum) return 'bg-destructive/20';
     } else if (side === 'away' || side === 'under') {
       if (num < pinNum) return 'bg-primary/20';
-      if (num > pinNum) return 'bg-destructive/20';
     }
   }
   return '';
@@ -237,13 +242,13 @@ export function OddsTable() {
     fetchOdds()
   }, [selectedSport, selectedMarket])
 
-  // Get all unique bookmaker keys and titles (with url) from the odds data
+  // Get all unique bookmaker keys and titles from the odds data
   const allBookmakers = React.useMemo(() => {
-    const map = new Map<string, { key: string; title: string; url?: string }>();
+    const map = new Map<string, { key: string; title: string }>();
     odds.forEach(event => {
       event.bookmakers.forEach(bm => {
         if (!map.has(bm.key) && ALLOWED_BOOK_KEYS.includes(bm.key)) {
-          map.set(bm.key, { key: bm.key, title: bm.title, url: bm.url });
+          map.set(bm.key, { key: bm.key, title: bm.title });
         }
       });
     });
@@ -280,15 +285,16 @@ export function OddsTable() {
     url: string | undefined,
     highlightClass: string = ''
   ) => {
-    const secondaryColor = highlightClass ? '' : 'text-muted-foreground';
     const content = (
-      <div className={`flex h-full items-center justify-center rounded-md bg-muted p-2 text-sm ${highlightClass}`}>
+      <div className={cn('flex h-full items-center justify-center rounded-md p-2 text-sm', highlightClass, {
+        'bg-muted': !highlightClass
+      })}>
         {!secondaryText ? (
           <span className="font-semibold">{formatPlus(primaryText)}</span>
         ) : (
           <div className="flex flex-col items-center">
             <span className="font-semibold">{formatPlus(primaryText)}</span>
-            <span className={`text-xs ${secondaryColor}`}>{formatPlus(secondaryText)}</span>
+            <span className="text-muted-foreground text-xs">{formatPlus(secondaryText)}</span>
           </div>
         )}
       </div>
@@ -296,7 +302,7 @@ export function OddsTable() {
 
     if (url) {
       return (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-80">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full rounded-md transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
           {content}
         </a>
       );
@@ -429,20 +435,20 @@ export function OddsTable() {
                         
                         return (
                           <div key={bookmaker.key} className="grid items-center gap-2" style={{ gridTemplateColumns }}>
-                            <a href={bookmaker.url} target="_blank" rel="noopener noreferrer" className="hover:underline text-sm font-medium">
+                            <a href={bookmakerData?.link} target="_blank" rel="noopener noreferrer" className="hover:underline text-sm font-medium truncate">
                               {bookmaker.title}
                             </a>
                             {selectedMarket === 'h2h' && <>
-                              {renderCombinedCell(homePrice, null, bookmaker.url, getHighlightClass(homePrice, pinnaclePrices.h2h.home, 'price', 'home'))}
-                              {renderCombinedCell(awayPrice, null, bookmaker.url, getHighlightClass(awayPrice, pinnaclePrices.h2h.away, 'price', 'away'))}
+                              {renderCombinedCell(homePrice, null, homeTeamData?.link || bookmakerData?.link, getHighlightClass(homePrice, pinnaclePrices.h2h.home, 'price', 'home'))}
+                              {renderCombinedCell(awayPrice, null, awayTeamData?.link || bookmakerData?.link, getHighlightClass(awayPrice, pinnaclePrices.h2h.away, 'price', 'away'))}
                             </>}
                             {selectedMarket === 'spreads' && <>
-                              {renderCombinedCell(homePoint, homePrice, bookmaker.url, getHighlightClass(homePrice, pinnaclePrices.spreads.home_price, 'price', 'home'))}
-                              {renderCombinedCell(awayPoint, awayPrice, bookmaker.url, getHighlightClass(awayPrice, pinnaclePrices.spreads.away_price, 'price', 'away'))}
+                              {renderCombinedCell(homePoint, homePrice, homeTeamData?.link || bookmakerData?.link, getHighlightClass(homePrice, pinnaclePrices.spreads.home_price, 'price', 'home'))}
+                              {renderCombinedCell(awayPoint, awayPrice, awayTeamData?.link || bookmakerData?.link, getHighlightClass(awayPrice, pinnaclePrices.spreads.away_price, 'price', 'away'))}
                             </>}
                             {selectedMarket === 'totals' && <>
-                              {renderCombinedCell(`O ${overPoint}`, overPrice, bookmaker.url, getHighlightClass(overPrice, pinnaclePrices.totals.over_price, 'price', 'over'))}
-                              {renderCombinedCell(`U ${underPoint}`, underPrice, bookmaker.url, getHighlightClass(underPrice, pinnaclePrices.totals.under_price, 'price', 'under'))}
+                              {renderCombinedCell(`O ${overPoint}`, overPrice, overData?.link || bookmakerData?.link, getHighlightClass(overPrice, pinnaclePrices.totals.over_price, 'price', 'over'))}
+                              {renderCombinedCell(`U ${underPoint}`, underPrice, underData?.link || bookmakerData?.link, getHighlightClass(underPrice, pinnaclePrices.totals.under_price, 'price', 'under'))}
                             </>}
                           </div>
                         );

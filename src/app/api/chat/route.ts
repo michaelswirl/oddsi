@@ -116,6 +116,7 @@ const functions: any = [
             team: { type: 'string', description: 'The name of the team picked.' },
             price: { type: 'number', description: 'The odds for the picked team.' },
             bookmaker: { type: 'string', description: 'The key of the bookmaker offering the best odds, e.g., "pinnacle".' },
+            link: { type: 'string', description: 'The direct betslip link for the pick.' },
           },
         },
         narrative: {

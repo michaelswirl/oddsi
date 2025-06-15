@@ -6,17 +6,20 @@ import { cn } from '@/lib/utils';
 interface Outcome {
   name: string;
   price: number;
+  link?: string;
 }
 
 interface Market {
   key: 'h2h'; // Only allow moneyline
   outcomes: Outcome[];
+  link?: string;
 }
 
 interface Bookmaker {
   key: string;
   title: string;
   markets: Market[];
+  link?: string;
 }
 
 interface Game {
@@ -30,6 +33,7 @@ interface Pick {
   price: number;
   bookmaker: string;
   market: 'h2h';
+  link?: string;
 }
 
 interface PickCardProps {
@@ -88,21 +92,26 @@ export function PickCard({ game, pick }: PickCardProps) {
           // If either team doesn't have an outcome, don't render the row.
           if (!homeTeamOutcome || !awayTeamOutcome) return null;
 
+          const homeLink = homeTeamOutcome.link || bookie.link;
+          const awayLink = awayTeamOutcome.link || bookie.link;
+
           return (
             <div key={bookie.key} className="grid grid-cols-3 gap-2 items-center text-sm p-2 rounded-md hover:bg-muted/50">
-              <div className="font-medium">{bookmakerTitles[bookie.key] || bookie.title}</div>
-              <div className={cn(
-                  "text-center p-1 rounded",
+              <a href={bookie.link} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline truncate">
+                {bookmakerTitles[bookie.key] || bookie.title}
+              </a>
+              <a href={homeLink} target="_blank" rel="noopener noreferrer" className={cn(
+                  "block w-full text-center p-2 rounded-md",
                   isPicked(bookie.key, home_team) ? "bg-primary text-primary-foreground font-bold ring-2 ring-ring" : "bg-muted text-muted-foreground"
               )}>
                 {homeTeamOutcome.price}
-              </div>
-              <div className={cn(
-                  "text-center p-1 rounded",
+              </a>
+              <a href={awayLink} target="_blank" rel="noopener noreferrer" className={cn(
+                  "block w-full text-center p-2 rounded-md",
                   isPicked(bookie.key, away_team) ? "bg-primary text-primary-foreground font-bold ring-2 ring-ring" : "bg-muted text-muted-foreground"
               )}>
                 {awayTeamOutcome.price}
-              </div>
+              </a>
             </div>
           );
         })}
