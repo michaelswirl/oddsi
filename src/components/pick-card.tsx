@@ -82,8 +82,11 @@ export function PickCard({ game, pick }: PickCardProps) {
           const market = bookie.markets.find(m => m.key === 'h2h');
           if (!market) return null;
 
-          const homeTeamOutcome = market.outcomes.find(o => o.name === home_team);
-          const awayTeamOutcome = market.outcomes.find(o => o.name === away_team);
+          const homeTeamOutcome = market.outcomes.find(o => o && o.name && o.name.trim().toLowerCase() === home_team.trim().toLowerCase());
+          const awayTeamOutcome = market.outcomes.find(o => o && o.name && o.name.trim().toLowerCase() === away_team.trim().toLowerCase());
+
+          // If either team doesn't have an outcome, don't render the row.
+          if (!homeTeamOutcome || !awayTeamOutcome) return null;
 
           return (
             <div key={bookie.key} className="grid grid-cols-3 gap-2 items-center text-sm p-2 rounded-md hover:bg-muted/50">
@@ -92,13 +95,13 @@ export function PickCard({ game, pick }: PickCardProps) {
                   "text-center p-1 rounded",
                   isPicked(bookie.key, home_team) ? "bg-primary text-primary-foreground font-bold ring-2 ring-ring" : "bg-muted text-muted-foreground"
               )}>
-                {homeTeamOutcome ? homeTeamOutcome.price : 'N/A'}
+                {homeTeamOutcome.price}
               </div>
               <div className={cn(
                   "text-center p-1 rounded",
                   isPicked(bookie.key, away_team) ? "bg-primary text-primary-foreground font-bold ring-2 ring-ring" : "bg-muted text-muted-foreground"
               )}>
-                {awayTeamOutcome ? awayTeamOutcome.price : 'N/A'}
+                {awayTeamOutcome.price}
               </div>
             </div>
           );
