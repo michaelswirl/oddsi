@@ -1,13 +1,12 @@
+import { ThemeProvider } from "@/components/theme-provider"
 import '@/styles/tailwind.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import '../styles/globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Oddsy - AI-Powered Betting Assistant',
-  description: 'Real-time, data-driven insights to help you make smarter bets.',
+  title: {
+    template: '%s - Radiant',
+    default: 'Radiant - Close every deal',
+  },
 }
 
 export default function RootLayout({
@@ -23,7 +22,16 @@ export default function RootLayout({
           href="https://api.fontshare.com/css?f%5B%5D=switzer@400,500,600,700&amp;display=swap"
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
