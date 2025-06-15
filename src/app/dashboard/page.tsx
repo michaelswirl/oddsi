@@ -15,7 +15,7 @@ import { OddsTable } from "@/components/odds-table"
 
 export default function Page() {
   return (
-    <div className="w-full h-full min-h-screen">
+    <div className="w-full h-full min-h-screen p-6">
       <OddsTable />
     </div>
   )
